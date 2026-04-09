@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wins - Smart Menu Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --forest-green: #1B4332;
+            --garden-green: #2D6A4F;
+            --leaf-green: #52B788;
+            --earth-brown: #766153;
+            --fresh-white: #ffffff;
+            --light-bg: #F0F4F2;
+            --text-dark: #1A1A1A;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding-bottom: 220px;
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background: var(--fresh-white);
+            text-align: center;
+            padding: 25px 10px;
+            border-bottom: 5px solid var(--forest-green);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .wins-logo {
+            max-width: 180px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            filter: brightness(0) saturate(100%) invert(19%) sepia(18%) saturate(1957%) hue-rotate(113deg) brightness(92%) contrast(92%);
+        }
+
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+
+        .category-title { 
+            font-family: 'Pacifico', cursive; 
+            font-size: 1.8rem; 
+            margin: 35px 0 15px 0; 
+            color: var(--forest-green); 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+
+        .menu-item {
+            background: var(--fresh-white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 22px;
+            margin-bottom: 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px var(--shadow);
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:active { transform: scale(0.96); background: #f0f9f4; }
+        .item-name { font-family: 'Lobster', cursive; font-size: 1.35rem; color: var(--forest-green); pointer-events: none; }
+        .item-price { font-weight: bold; font-size: 1.2rem; color: var(--garden-green); background: rgba(45, 106, 79, 0.08); padding: 5px 14px; border-radius: 20px; pointer-events: none; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .modal {
+            background: white;
+            width: 85%;
+            max-width: 420px;
+            padding: 25px;
+            border-radius: 25px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal h3 { font-family: 'Pacifico', cursive; color: var(--forest-green); margin-top: 0; font-size: 1.6rem; }
+        .chef-note-area { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; resize: none; box-sizing: border-box; background: #f9f9f9; margin-top: 10px; font-family: inherit; }
+        .addition-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .addition-row label { cursor: pointer; display: flex; justify-content: space-between; width: 100%; padding-right: 10px; }
+
+        .cart-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background: var(--fresh-white);
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 2000;
+            border: 2px solid var(--forest-green);
+            display: none;
+        }
+
+        .cart-details { max-height: 100px; overflow-y: auto; margin-bottom: 10px; border-bottom: 1px solid #eee; }
+        .total-usd { font-size: 1.8rem; font-weight: 900; color: var(--forest-green); line-height: 1; }
+        .total-alt { font-size: 0.85rem; color: var(--earth-brown); font-weight: 500; }
+
+        .btn-send { background: var(--forest-green); color: white; border: none; padding: 15px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; }
+
+        .admin-tasa-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--forest-green);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-weight: 900;
+            z-index: 2500;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://i.postimg.cc/TwPy1Y9F/LOGO-WINS.png" alt="Logo Wins" class="wins-logo">
+    </header>
+
+    <div class="container" id="menu-container"></div>
+
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal">
+            <h3 id="modal-item-name">Plato</h3>
+            <div id="pizza-section" style="display:none;">
+                <p style="font-weight:bold; font-size:0.9rem; margin-bottom: 5px; color: var(--earth-brown);">🌿 Adiciones Extra:</p>
+                <div id="additions-list"></div>
+            </div>
+            <p style="font-weight:bold; font-size:0.9rem; margin-top:15px; color: var(--earth-brown);">👨‍🍳 Nota para el Chef:</p>
+            <textarea id="chef-note" class="chef-note-area" rows="3" placeholder="Ej: Término medio, sin sal..."></textarea>
+            <button onclick="confirmProduct()" style="background:var(--forest-green); color:white; border:none; width:100%; padding:15px; border-radius:50px; font-weight:bold; margin-top:20px; cursor:pointer;">Agregar al Pedido</button>
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; margin-top:10px; color:gray; cursor:pointer;">Regresar</button>
+        </div>
+    </div>
+
+    <button class="admin-tasa-btn" onclick="ajustarTasaVES()">VES</button>
+
+    <div class="cart-bar" id="cart-bar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:10px;">
+            <span style="font-weight: bold; color: var(--forest-green);">🌿 Tu Selección Fresh:</span>
+            <button onclick="clearCart()" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Vaciar</button>
+        </div>
+        <div id="cart-details"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top:10px;">
+            <div>
+                <div class="total-usd">$<span id="total-val">0</span></div>
+                <div class="total-alt"><span id="total-cop-val">0</span> COP</div>
+                <div class="total-alt"><span id="total-ves-val">0</span> VES</div>
+            </div>
+            <button onclick="sendWhatsApp()" style="background:var(--forest-green); color:white; border:none; padding:15px 25px; border-radius:50px; font-weight:bold; cursor:pointer;">Pedir ➔</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- CONFIGURACIÓN --- */
+        const TASA_COP = 3700;
+        let TASA_VES = 570;
+        const WHATSAPP_NUM = "584129315743";
+        
+        const VOICE_MONKEY_URL = "https://api-v2.voicemonkey.io/announcement?token=a3e900b0751be6aa494e6aa0ab57e96f_2688d921dadec63ccfc678e75ced27be&device=nuevopedidowins";
+        const GOOGLE_EXCEL_URL = "https://script.google.com/macros/s/AKfycbwF_BdoKYw9e2bu_MrP1b-4HI4glaH7mGbw0XkplkCm_b33EtFW3sw_z_1-kMq6pLjA/exec";
+
+        let cart = [];
+        let currentItem = null;
+
+        const adiciones = [
+            {n: "Maiz", p: 1}, {n: "Tocineta", p: 1}, {n: "Anchoas", p: 1},
+            {n: "Salami", p: 1}, {n: "Pollo", p: 3}, {n: "Prosciutto", p: 4},
+            {n: "Queso Manchego", p: 4}, {n: "Queso Pecorino", p: 4}, {n: "Camarones", p: 6}
+        ];
+
+        const menuData = {
+            "Hamburguesas 🍔": [
+                {n: "Bacon Kubrick", p: 12}, {n: "Crispy Burger", p: 12}, {n: "Chicken Burger", p: 11},
+                {n: "American Burger", p: 10}, {n: "Al Vino Burger", p: 13}, {n: "Mar y Tierra", p: 15}
+            ],
+            "Pizzas 🍕": [
+                {n: "Margarita (M)", p: 10, isPizza: true}, {n: "Margarita (G)", p: 15, isPizza: true}, 
+                {n: "Prosciutto Green (M)", p: 19, isPizza: true}, {n: "Prosciutto Green (G)", p: 33, isPizza: true}
+            ],
+            "Carnes 🥩": [{n: "Churrasco de Solomo", p: 10}, {n: "Muchacho Al Vino", p: 12}],
+            "Marisquería 🦐": [{n: "Cazuela de Mariscos", p: 19}, {n: "Ceviche Peruano", p: 15}]
+        };
+
+        function initMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '';
+            for (const category in menuData) {
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.innerText = `🌿 ${category}`;
+                container.appendChild(title);
+                menuData[category].forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'menu-item';
+                    div.innerHTML = `<span class="item-name">${item.n}</span><span class="item-price">$${item.p}</span>`;
+                    div.addEventListener('click', () => openProductModal(item));
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        function openProductModal(item) {
+            currentItem = item;
+            document.getElementById('modal-item-name').innerText = item.n;
+            document.getElementById('chef-note').value = '';
+            const pSec = document.getElementById('pizza-section');
+            
+            if(item.isPizza) {
+                pSec.style.display = 'block';
+                document.getElementById('additions-list').innerHTML = adiciones.map((adj, i) => `
+                    <div class="addition-row">
+                        <label for="adj-${i}">
+                            <span>${adj.n}</span>
+                            <span>+$${adj.p}</span>
+                        </label>
+                        <input type="checkbox" id="adj-${i}" value="${i}">
+                    </div>
+                `).join('');
+            } else { pSec.style.display = 'none'; }
+            
+            document.getElementById('product-modal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('product-modal').style.display = 'none'; }
+
+        function confirmProduct() {
+            let finalPrice = currentItem.p;
+            let extras = [];
+            
+            // Lógica corregida para capturar los adicionales
+            if(currentItem.isPizza) {
+                const checks = document.querySelectorAll('#additions-list input:checked');
+                checks.forEach(cb => {
+                    const adj = adiciones[cb.value];
+                    finalPrice += adj.p;
+                    extras.push(adj.n);
+                });
+            }
+            
+            cart.push({ 
+                name: currentItem.n, 
+                price: finalPrice, 
+                extras: extras, 
+                note: document.getElementById('chef-note').value.trim() 
+            });
+            
+            renderCart();
+            closeModal();
+        }
+
+        function renderCart() {
+            const bar = document.getElementById('cart-bar');
+            const details = document.getElementById('cart-details');
+            if (cart.length === 0) { bar.style.display = 'none'; return; }
+            bar.style.display = 'block';
+            
+            // Visualización corregida para mostrar los extras en el carrito
+            details.innerHTML = cart.map(i => `
+                <div style="border-bottom:1px solid #eee; padding:8px 0;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.9rem;">
+                        <span>• ${i.name}</span><span>$${i.price}</span>
+                    </div>
+                    ${i.extras.length ? `<div style="font-size:0.75rem; color:#666; font-style:italic; margin-left: 10px;">+ Adiciones: ${i.extras.join(', ')}</div>` : ''}
+                    ${i.note ? `<div style="font-size:0.75rem; color:var(--garden-green); margin-left: 10px; margin-top: 3px;">📝 Nota: ${i.note}</div>` : ''}
+                </div>
+            `).join('');
+            
+            const totalUSD = cart.reduce((s, item) => s + item.price, 0);
+            document.getElementById('total-val').innerText = totalUSD.toFixed(2);
+            document.getElementById('total-cop-val').innerText = (totalUSD * TASA_COP).toLocaleString('es-CO');
+            document.getElementById('total-ves-val').innerText = (totalUSD * TASA_VES).toLocaleString('es-VE', {minimumFractionDigits: 2});
+        }
+
+        function clearCart() { cart = []; renderCart(); }
+
+        function sendWhatsApp() {
+            if(cart.length === 0) return;
+            const mesa = prompt("¿Número de mesa?") || "N/A";
+            
+            // Preparar texto para Excel (incluyendo extras)
+            let pedidoTexto = cart.map(i => {
+                let txt = i.name;
+                if(i.extras.length) txt += ` [Extras: ${i.extras.join(', ')}]`;
+                if(i.note) txt += ` (Nota: ${i.note})`;
+                return txt;
+            }).join(" | ");
+
+            // Disparos API
+            fetch(VOICE_MONKEY_URL).catch(() => {});
+            fetch(`${GOOGLE_EXCEL_URL}?pedido=${encodeURIComponent(pedidoTexto)}&mesa=${encodeURIComponent(mesa)}`, { mode: 'no-cors' }).catch(() => {});
+
+            // Mensaje WhatsApp
+            let msg = `¡Hola Wins! 🌿 Mi pedido (Mesa: ${mesa}) es:%0A%0A`;
+            cart.forEach(i => {
+                msg += `• *${i.name}* ($${i.price})%0A`;
+                if(i.extras.length) msg += `   └ 🌿 _Adiciones: ${i.extras.join(', ')}_%0A`;
+                if(i.note) msg += `   └ 📝 _Nota: ${i.note}_%0A`;
+            });
+            const totalUSD = cart.reduce((s, i) => s + i.price, 0);
+            msg += `%0A💰 *TOTAL:* $${totalUSD.toFixed(2)} USD`;
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${msg}`, '_blank');
+        }
+
+        function ajustarTasaVES() {
+            let n = prompt("Tasa VES:", TASA_VES);
+            if (n !== null && !isNaN(n)) { TASA_VES = parseFloat(n); renderCart(); }
+        }
+
+        initMenu();
+    </script>
+</body>
+</html>
