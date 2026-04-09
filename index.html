@@ -190,12 +190,16 @@
         let currentItem = null;
 
         const adiciones = [
-            {n: "Maiz", p: 1}, {n: "Tocineta", p: 1}, {n: "Anchoas", p: 1},
-            {n: "Salami", p: 1}, {n: "Pollo", p: 3}, {n: "Prosciutto", p: 4},
-            {n: "Queso Manchego", p: 4}, {n: "Queso Pecorino", p: 4}, {n: "Camarones", p: 6}
+            {n: "Maiz", p: 2}, {n: "Tocineta", p: 1}, {n: "Anchoas", p: 1},
+            {n: "Salami", p: 3}, {n: "Pollo", p: 3}, {n: "Prosciutto", p: 4},
+            {n: "Queso Manchego", p: 4}, {n: "Queso Pecorino", p: 4}, {n: "Camarones", p: 7}
         ];
 
         const menuData = {
+            "Especialidades ✨": [
+                {n: "Carpaccio de Suprema de Pollo", p: 11},
+                {n: "Carpaccio de Solomillo de Ternera", p: 11}
+            ],
             "Hamburguesas 🍔": [
                 {n: "Bacon Kubrick", p: 12}, {n: "Crispy Burger", p: 12}, {n: "Chicken Burger", p: 11},
                 {n: "American Burger", p: 10}, {n: "Al Vino Burger", p: 13}, {n: "Mar y Tierra", p: 15}
@@ -204,8 +208,37 @@
                 {n: "Margarita (M)", p: 10, isPizza: true}, {n: "Margarita (G)", p: 15, isPizza: true}, 
                 {n: "Prosciutto Green (M)", p: 19, isPizza: true}, {n: "Prosciutto Green (G)", p: 33, isPizza: true}
             ],
-            "Carnes 🥩": [{n: "Churrasco de Solomo", p: 10}, {n: "Muchacho Al Vino", p: 12}],
-            "Marisquería 🦐": [{n: "Cazuela de Mariscos", p: 19}, {n: "Ceviche Peruano", p: 15}]
+            "Pastas & Lasañas 🍝": [
+                {n: "Lasaña", p: 6.75}, {n: "Pasta a la Marinera", p: 16}
+            ],
+            "Carnes 🥩": [
+                {n: "Churrasco de Solomo", p: 10}, {n: "Muchacho Al Vino", p: 12}
+            ],
+            "Aves 🍗": [
+                {n: "Pechuga a la Menier", p: 9}, {n: "Suprema de Pollo", p: 10},
+                {n: "Salteado de Pollo", p: 8}, {n: "Rolling de Suprema", p: 12}
+            ],
+            "Marisquería 🦐": [
+                {n: "Cazuela de Mariscos", p: 19}, {n: "Ceviche Peruano", p: 15},
+                {n: "Camarones al Ajillo", p: 19}, {n: "Coctel de Camarones", p: 15}
+            ],
+            "Picadas 🍟": [
+                {n: "Salchipapas", p: 9}, {n: "Picada Mixta", p: 15}
+            ],
+            "Haru Cream 🍦": [
+                {n: "Haaru de Oreo (Mediano)", p: 2.2}, {n: "Haaru de Oreo (Grande)", p: 4.4},
+                {n: "Haaru de Pirulin (Mediano)", p: 2.2}, {n: "Haaru de Pirulin (Grande)", p: 4.4},
+                {n: "Haaru de Flips (Mediano)", p: 2.2}, {n: "Haaru de Flips (Grande)", p: 4.4},
+                {n: "Banana Split", p: 5}
+            ],
+            "Cocteles 🍹": [
+                {n: "Cuba Libre", p: 5}, {n: "Mojito Cubano", p: 5},
+                {n: "Piña Colada", p: 7}, {n: "Laguna Roja o Azul", p: 5},
+                {n: "Mai Tai", p: 6}
+            ],
+            "Bebidas 🥤": [
+                {n: "Malteadas", p: 5}, {n: "Jugos Naturales", p: 3}
+            ]
         };
 
         function initMenu() {
@@ -254,7 +287,6 @@
             let finalPrice = currentItem.p;
             let extras = [];
             
-            // Lógica corregida para capturar los adicionales
             if(currentItem.isPizza) {
                 const checks = document.querySelectorAll('#additions-list input:checked');
                 checks.forEach(cb => {
@@ -281,7 +313,6 @@
             if (cart.length === 0) { bar.style.display = 'none'; return; }
             bar.style.display = 'block';
             
-            // Visualización corregida para mostrar los extras en el carrito
             details.innerHTML = cart.map(i => `
                 <div style="border-bottom:1px solid #eee; padding:8px 0;">
                     <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.9rem;">
@@ -304,7 +335,6 @@
             if(cart.length === 0) return;
             const mesa = prompt("¿Número de mesa?") || "N/A";
             
-            // Preparar texto para Excel (incluyendo extras)
             let pedidoTexto = cart.map(i => {
                 let txt = i.name;
                 if(i.extras.length) txt += ` [Extras: ${i.extras.join(', ')}]`;
@@ -312,11 +342,9 @@
                 return txt;
             }).join(" | ");
 
-            // Disparos API
             fetch(VOICE_MONKEY_URL).catch(() => {});
             fetch(`${GOOGLE_EXCEL_URL}?pedido=${encodeURIComponent(pedidoTexto)}&mesa=${encodeURIComponent(mesa)}`, { mode: 'no-cors' }).catch(() => {});
 
-            // Mensaje WhatsApp
             let msg = `¡Hola Wins! 🌿 Mi pedido (Mesa: ${mesa}) es:%0A%0A`;
             cart.forEach(i => {
                 msg += `• *${i.name}* ($${i.price})%0A`;
